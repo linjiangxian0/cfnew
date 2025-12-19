@@ -1,13 +1,14 @@
 import { connect } from 'cloudflare:sockets';
 
 // --- 硬编码配置 ---
-const authToken = 'f64bdc57-0f54-4705-bf75-cfd646d98c06';
+const authToken = '5c7751b7-67d8-4deb-88d3-117982c62907';
 let fallbackAddress = '';
+let fallbackPort = '443';
 const socks5Config = '';
 // 手动指定地区（留空则自动检测，可选值：US、SG、JP、HK、KR、DE、SE、NL、FI、GB）
 const manualWorkerRegion = '';
 // D短地址（自定义路径，留空则使用UUID路径，支持多级路径如：mypath 或 path/to/sub）
-const customPath = '';
+const customPath = '/haze';
 // GitHub订阅URL（硬编码）
 const githubPreferredURL = 'https://raw.githubusercontent.com/qwer-search/bestip/refs/heads/main/kejilandbestip.txt';
 // 启用GitHub优选IP（true启用，false禁用）
@@ -15,7 +16,7 @@ const enableGitHubPreferred = true;
 // 启用其他优选（域名优选，true启用，false禁用）
 const enableOtherPreferred = true;
 // API地址配置（订阅转换服务）
-const apiBaseUrl = 'https://url.v1.mk/sub';
+const apiBaseUrl = 'https://subapi.cmliussss.net/sub';
 
 const directDomains = [
     { name: "cloudflare.182682.xyz", domain: "cloudflare.182682.xyz" }, 
