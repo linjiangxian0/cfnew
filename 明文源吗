@@ -104,7 +104,7 @@
     const ADDRESS_TYPE_URL = 2;
     const ADDRESS_TYPE_IPV6 = 3;
 
-    function isValidFormat(str) {
+	function isValidFormat(str) {
         const userRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
         return userRegex.test(str);
     }
@@ -121,6 +121,24 @@
         
         return false;
     }
+
+    const getIndexedName = (function() {
+		const nodeCounters = {};   // 计数
+		return function(baseName) {
+			// 若别名为域名对节点不编号
+			if (baseName.includes('.')) {
+				return baseName;
+			}
+			// 若别名为非域名对节点编号
+			if (!nodeCounters[baseName]) {
+				nodeCounters[baseName] = 1;
+			} else {
+				nodeCounters[baseName]++;
+			}
+			const index = String(nodeCounters[baseName]).padStart(2, '0');
+			return `${baseName}-${index}`;
+		};
+    })();
 
     async function initKVStore(env) {
         
@@ -1807,7 +1825,8 @@
             portsToGenerate.forEach(({ port, tls }) => {
                 if (tls) {
                     
-                    const wsNodeName = `${nodeNameBase}-${port}-WS-TLS`;
+					const baseName = `${nodeNameBase}-${port}-WS-TLS`;
+					const wsNodeName = getIndexedName(baseName);
                     const wsParams = new URLSearchParams({ 
                         encryption: 'none', 
                         security: 'tls', 
@@ -1829,7 +1848,8 @@
                     links.push(`${proto}://${user}@${safeIP}:${port}?${wsParams.toString()}#${encodeURIComponent(wsNodeName)}`);
                 } else {
                     
-                    const wsNodeName = `${nodeNameBase}-${port}-WS`;
+					const baseName = `${nodeNameBase}-${port}-WS`;
+					const wsNodeName = getIndexedName(baseName);
                     const wsParams = new URLSearchParams({
                         encryption: 'none',
                         security: 'none',
@@ -1889,7 +1909,8 @@
             portsToGenerate.forEach(({ port, tls }) => {
                 if (tls) {
                     
-                    const wsNodeName = `${nodeNameBase}-${port}-${atob('VHJvamFu')}-WS-TLS`;
+					const baseName = `${nodeNameBase}-${port}-${atob('VHJvamFu')}-WS-TLS`;
+					const wsNodeName = getIndexedName(baseName);
                     const wsParams = new URLSearchParams({ 
                         security: 'tls', 
                         sni: workerDomain, 
@@ -1910,7 +1931,8 @@
                     links.push(`${atob('dHJvamFuOi8v')}${password}@${safeIP}:${port}?${wsParams.toString()}#${encodeURIComponent(wsNodeName)}`);
                 } else {
                     
-                    const wsNodeName = `${nodeNameBase}-${port}-${atob('VHJvamFu')}-WS`;
+					const baseName = `${nodeNameBase}-${port}-${atob('VHJvamFu')}-WS`;
+					const wsNodeName = getIndexedName(baseName);
                     const wsParams = new URLSearchParams({
                         security: 'none',
                         type: 'ws',
@@ -5662,7 +5684,8 @@
             
             if (CF_HTTPS_PORTS.includes(port)) {
                 
-                const wsNodeName = `${nodeName}-${port}-WS-TLS`;
+				const baseName = `${nodeName}-${port}-WS-TLS`;
+				const wsNodeName = getIndexedName(baseName);
                 let link = `${proto}://${user}@${item.ip}:${port}?encryption=none&security=tls&sni=${workerDomain}&fp=${enableECH ? 'chrome' : 'randomized'}&type=ws&host=${workerDomain}&path=${wsPath}`;
                 
                 // 如果启用了ECH，添加ech参数（ECH需要伪装成Chrome浏览器）
@@ -5677,13 +5700,15 @@
             } else if (CF_HTTP_PORTS.includes(port)) {
                 
                 if (!disableNonTLS) {
-                    const wsNodeName = `${nodeName}-${port}-WS`;
+					const baseName = `${nodeName}-${port}-WS`;
+					const wsNodeName = getIndexedName(baseName);
                     const link = `${proto}://${user}@${item.ip}:${port}?encryption=none&security=none&type=ws&host=${workerDomain}&path=${wsPath}#${encodeURIComponent(wsNodeName)}`;
                     links.push(link);
                 }
             } else {
                 
-                const wsNodeName = `${nodeName}-${port}-WS-TLS`;
+				const baseName = `${nodeName}-${port}-WS-TLS`;
+				const wsNodeName = getIndexedName(baseName);
                 let link = `${proto}://${user}@${item.ip}:${port}?encryption=none&security=tls&sni=${workerDomain}&fp=${enableECH ? 'chrome' : 'randomized'}&type=ws&host=${workerDomain}&path=${wsPath}`;
                 
                 // 如果启用了ECH，添加ech参数（ECH需要伪装成Chrome浏览器）
@@ -5712,7 +5737,8 @@
             const safeIP = item.ip.includes(':') ? `[${item.ip}]` : item.ip;
             const port = item.port || 443;
             
-            const wsNodeName = `${nodeNameBase}-${port}-xhttp`;
+            const baseName = `${nodeNameBase}-${port}-xhttp`;
+			const wsNodeName = getIndexedName(baseName);
             const params = new URLSearchParams({
                 encryption: 'none',
                 security: 'tls',
@@ -5727,7 +5753,7 @@
             if (enableECH) {
                 const dnsServer = customDNS || 'https://223.5.5.5/dns-query';
                 const echDomain = customECHDomain || 'cloudflare-ech.com';
-                params.set('alpn', 'h2');
+                params.set('alpn', 'h3,h2');
                 params.set('ech', `${echDomain}+${dnsServer}`);
             }
             
@@ -5753,7 +5779,8 @@
             
             if (CF_HTTPS_PORTS.includes(port)) {
                 
-                const wsNodeName = `${nodeName}-${port}-${atob('VHJvamFu')}-WS-TLS`;
+                const baseName = `${nodeName}-${port}-${atob('VHJvamFu')}-WS-TLS`;
+				const wsNodeName = getIndexedName(baseName);
                 let link = `${atob('dHJvamFuOi8v')}${password}@${item.ip}:${port}?security=tls&sni=${workerDomain}&fp=chrome&type=ws&host=${workerDomain}&path=${wsPath}`;
                 
                 // 如果启用了ECH，添加ech参数（ECH需要伪装成Chrome浏览器）
@@ -5768,13 +5795,15 @@
             } else if (CF_HTTP_PORTS.includes(port)) {
                 
                 if (!disableNonTLS) {
-                    const wsNodeName = `${nodeName}-${port}-${atob('VHJvamFu')}-WS`;
+                    const baseName = `${nodeName}-${port}-${atob('VHJvamFu')}-WS`;
+					const wsNodeName = getIndexedName(baseName);
                     const link = `${atob('dHJvamFuOi8v')}${password}@${item.ip}:${port}?security=none&type=ws&host=${workerDomain}&path=${wsPath}#${encodeURIComponent(wsNodeName)}`;
                     links.push(link);
                 }
             } else {
                 
-                const wsNodeName = `${nodeName}-${port}-${atob('VHJvamFu')}-WS-TLS`;
+                const baseName = `${nodeName}-${port}-${atob('VHJvamFu')}-WS-TLS`;
+				const wsNodeName = getIndexedName(baseName);
                 let link = `${atob('dHJvamFuOi8v')}${password}@${item.ip}:${port}?security=tls&sni=${workerDomain}&fp=chrome&type=ws&host=${workerDomain}&path=${wsPath}`;
                 
                 // 如果启用了ECH，添加ech参数（ECH需要伪装成Chrome浏览器）
